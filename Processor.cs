@@ -51,27 +51,16 @@ namespace GR2Renamer
                 };
                 try
                 {
-                    string generatedName = GranReader.GetGR2Filename(filePath);
-                    string from = filePath;
-                    string to = Path.Combine(outputDirectory, generatedName + ".gr2");
-                    if (generatedName.Length > 0 && to != from)
+                    string generatedName = GranReader.GetGR2Name(filePath);
+                    if (generatedName.Length > 0)
                     {
-                        try
+                        string originalFilename = Path.GetFileNameWithoutExtension(filePath);
+                        string from = filePath;
+                        processed.NewName = Path.Combine(outputDirectory, $"{generatedName}_{originalFilename}.gr2");
+                        if (processed.CurrentName != processed.NewName)
                         {
-                            File.Move(processed.CurrentName, to);
-                        } catch(IOException)
-                        {
-                            // File might already exist, so try renaming it with the original file name
-                            // as a suffix.
-                            string pureFilename = Path.GetFileNameWithoutExtension(filePath);
-                            string backupTo = Path.Combine(outputDirectory, $"{generatedName}_{pureFilename}.gr2");
-
-                            File.Move(processed.CurrentName, backupTo);
+                            File.Move(processed.CurrentName, processed.NewName);
                         }
-                        processed.NewName = to;
-                    } else
-                    {
-                        processed.NewName = processed.CurrentName;
                     }
                 }
                 catch (Exception e)

@@ -9,10 +9,10 @@ namespace GR2Renamer
     {
 
         /// <summary>
-        /// Opens filename, reading it as a GR2 file and returning back a new suitable name (no extension).
+        /// Opens filename, reading it as a GR2 file and returning back a new suitable name.
         /// Returns an empty string if no suitable name was found.
         /// </summary>
-        public static string GetGR2Filename(string filename)
+        public static string GetGR2Name(string filename)
         {
             using (var fs = File.OpenRead(filename))
             {
@@ -21,17 +21,17 @@ namespace GR2Renamer
                 gr2Reader.Read(root);
                 gr2Reader.Dispose();
 
-                if (root.Meshes != null && root.Meshes.Count > 0)
+                if (root.Meshes?.Count > 0)
                 {
                     return root.Meshes[0].Name;
                 }
-                else if (root.Animations != null && root.Animations.Count > 0)
+                else if (root.Animations?.Count > 0)
                 {
                     return $"ANIM_{root.Animations[0].Name}";
                 }
-                else if (root.Skeletons != null && root.Skeletons.Count > 0)
+                else if (root.Skeletons?.Count > 0)
                 {
-                    return $"SKELETON_{root.Skeletons[0].Name}";
+                    return $"SKELETONS_{root.Skeletons.Count}:{root.Skeletons[0].Bones?.Count}";
                 }
                 return "";
             }
