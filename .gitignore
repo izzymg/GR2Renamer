@@ -3,3 +3,4 @@ obj/**
 granny2_x64_ESO.dll
 granny2.dll
 *.user
+.vs

@@ -39,9 +39,6 @@ namespace Steak
         /// Processes the queued filenames, reading them as GR2 data,
         /// renaming them to an appropriate name, and returning data about
         /// the rename.
-        /// If a file already has the correct name, it will be skipped.
-        /// If the new name already exists, it will be renamed with its original
-        /// name as a suffix.
         /// </summary>
         public IEnumerable<Processed> Process(string outputDirectory)
         {
@@ -52,23 +49,29 @@ namespace Steak
                 {
                     CurrentName = filePath,
                 };
-
-                string pureFilename = Path.GetFileNameWithoutExtension(filePath);
-
                 try
                 {
-                    processed.NewName = GranReader.GetGR2Filename(filePath);
-                    if (processed.NewName != processed.CurrentName)
+                    string generatedName = GranReader.GetGR2Filename(filePath);
+                    string from = filePath;
+                    string to = Path.Combine(outputDirectory, generatedName + ".gr2");
+                    if (generatedName.Length > 0 && to != from)
                     {
                         try
                         {
-                            File.Move(processed.CurrentName, Path.Combine(outputDirectory, processed.NewName));
-                        }
-                        catch (IOException)
+                            File.Move(processed.CurrentName, to);
+                        } catch(IOException)
                         {
-                            processed.NewName = $"{processed.CurrentName}_{pureFilename}";
-                            File.Move(processed.CurrentName, Path.Combine(outputDirectory, processed.NewName));
+                            // File might already exist, so try renaming it with the original file name
+                            // as a suffix.
+                            string pureFilename = Path.GetFileNameWithoutExtension(filePath);
+                            string backupTo = Path.Combine(outputDirectory, $"{generatedName}_{pureFilename}.gr2");
+
+                            File.Move(processed.CurrentName, backupTo);
                         }
+                        processed.NewName = to;
+                    } else
+                    {
+                        processed.NewName = processed.CurrentName;
                     }
                 }
                 catch (Exception e)
