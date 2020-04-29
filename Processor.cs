@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
-namespace Steak
+namespace GR2Renamer
 {
     public class Processor
     {

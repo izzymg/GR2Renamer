@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{7694655F-BAD7-4920-B6BF-F387AE6584F5}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>steak</RootNamespace>
-    <AssemblyName>steak</AssemblyName>
+    <RootNamespace>GR2Renamer</RootNamespace>
+    <AssemblyName>GR2Renamer</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

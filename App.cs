@@ -3,7 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Steak
+namespace GR2Renamer
 {
 
     /// <summary>

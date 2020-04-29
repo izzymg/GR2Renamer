@@ -3,7 +3,7 @@ using LSLib.Granny.Model;
 using System.IO;
 using System.Diagnostics;
 
-namespace Steak
+namespace GR2Renamer
 {
     public static class GranReader
     {
