@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System;
 using System.Diagnostics;
-using System.Collections.Generic;
+using System.Linq;
 
 namespace Steak
 {
@@ -20,7 +20,6 @@ namespace Steak
                 return;
             }
             Console.WriteLine(formatted);
- 
         }
     }
 
@@ -81,62 +80,42 @@ namespace Steak
         private static void Run(string[] cmdlineArgs)
         {
             Config cfg = App.GetConfig(cmdlineArgs);
-            Logger.Log($"Reading {cfg.Directory}...");
+            Logger.Log($"Using {cfg.Directory}...");
 
-            // Recurse through the configured directory, queueing the files for processing.
-            int queued = 0;
             Processor processor = new Processor();
-            foreach (var filename in Directory.EnumerateFiles(cfg.Directory, "*.gr2", SearchOption.AllDirectories))
-            {
-                processor.QueueFile(filename);
-                queued++;
-                if (cfg.HasFileLimit && queued > cfg.FileLimit)
-                {
-                    break;
-                }
-            }
-
-            // Process all the files in the queue
+            int queued = processor.QueueDirectory(cfg.Directory, cfg.HasFileLimit ? cfg.FileLimit : 0);
             Logger.Log($"Queued {queued} files...");
-            Queue<Processor.Processed> sucessfullyProcessed = new Queue<Processor.Processed>(queued);
-            List<Exception> errors = new List<Exception>();
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            int processedCount = 0;
-            foreach (var result in processor.Process())
-            {
-                // TODO: log error to file
-                if(result.Err != null)
-                {
-                    errors.Add(result.Err);
-                    continue;
-                }
-                sucessfullyProcessed.Enqueue(result);
-                processedCount++;
-                if (processedCount % 500 == 0)
-                {
-                    Logger.Log($"Progress: {processedCount}/{queued} with {errors.Count} errored files");
-                }
-            };
 
-            using (var sw = File.CreateText(App.ChangeLogFilename))
-            {
-                foreach (var item in sucessfullyProcessed)
+            using (var errorLog = File.CreateText(App.ErrorLogFilename))
+            { 
+                using (var changeLog = File.CreateText(App.ChangeLogFilename))
                 {
-                    sw.WriteLine($"{item.CurrentName} -> {item.NewName}");
-                }
-            }
-            using (var sw = File.CreateText(App.ErrorLogFilename))
-            {
-                foreach (var item in errors)
-                {
-                    sw.WriteLine(item.Message);
+
+                    var query = processor.Process(cfg.Directory).Select((Processor.Processed item, int index) =>
+                    {
+                        if(index % 500 == 0)
+                        {
+                            Logger.Log($"Progress: {index}/{queued}, {stopwatch.ElapsedMilliseconds}ms");
+                        }
+                        if (item.Err != null)
+                        {
+                            errorLog.WriteLine($"{item.CurrentName}: {item.Err.Message}");
+                            return 1;
+                        }
+                        changeLog.WriteLine($"{item.CurrentName} -> {item.NewName}");
+                        return 0;
+                    });
+
+                    int errors = query.Sum();
+
+                    stopwatch.Stop();
+                    Logger.Log($"Done. Completed with {errors} errored files in {stopwatch.ElapsedMilliseconds}ms.");
                 }
             }
 
-            stopwatch.Stop();
-            Logger.Log($"Done. Processed {sucessfullyProcessed.Count} files with {errors.Count} errored in {stopwatch.ElapsedMilliseconds}ms.");
         }
 
         private static void Main(string[] args)

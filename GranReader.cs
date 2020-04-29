@@ -1,6 +1,7 @@
 ﻿using LSLib.Granny.GR2;
 using LSLib.Granny.Model;
 using System.IO;
+using System.Diagnostics;
 
 namespace Steak
 {
@@ -43,5 +44,4 @@ namespace Steak
             }
         }
     }
-}
 }
