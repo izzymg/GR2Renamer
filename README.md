@@ -7,11 +7,11 @@ and renaming them accordingly.
 
 Requires Visual Studio 2017
 
-Place `granny2.dll` & `granny2_x64_ESO.dll` into the root directory, ensure VS copies to output directory.
-
 Link the project to [lslib](https://github.com/Norbyte/lslib/)
 
 ### Usage
+
+See LSLib for DLL deps.
 
 Set max files to an integer to limit it to a set amount of files before quitting.
 
